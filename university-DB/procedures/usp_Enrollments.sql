@@ -63,8 +63,7 @@ BEGIN
             THROW 50003, 'Enrollment failed: Course ID does not exist in the system.', 1;
 
         -- ─────────────────────────────────────
-        -- CHECK 4: Has the student already enrolled
-        --          in this course this semester?
+        -- CHECK 4: Has the student already enrolled in this course this semester?
         -- ─────────────────────────────────────
         SELECT @AlreadyEnrolled = COUNT(*)
         FROM dbo.Enrollments
@@ -78,8 +77,7 @@ BEGIN
             THROW 50004, 'Enrollment failed: Student is already enrolled in this course for the current semester.', 1;
 
         -- ─────────────────────────────────────
-        -- CHECK 5: Has the student hit the 7-course
-        --          cap for this semester?
+        -- CHECK 5: Has the student hit the 7-course cap for this semester?
         -- ─────────────────────────────────────
         SELECT @EnrollmentCount = COUNT(*)
         FROM dbo.Enrollments
@@ -92,8 +90,7 @@ BEGIN
             THROW 50005, 'Enrollment failed: Student has reached the maximum of 7 courses for this semester.', 1;
 
         -- ─────────────────────────────────────
-        -- All checks passed — open transaction
-        -- and perform the enrollment
+        -- All checks passed — open transaction and perform the enrollment
         -- ─────────────────────────────────────
         BEGIN TRANSACTION;
 
@@ -119,10 +116,7 @@ END;
 GO
 
 
--- =============================================
 -- USAGE EXAMPLES
--- =============================================
-
 -- Successful enrollment
 EXEC dbo.usp_EnrollStudent
     @StudentID = 121,
