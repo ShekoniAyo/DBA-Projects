@@ -1,4 +1,3 @@
--- =============================================
 -- Stored Procedure: usp_EnrollStudent (Updated)
 -- Purpose: Safely enrolls a student into a course
 --          for the current semester with full
@@ -8,7 +7,6 @@
 --   - Semester and Academic_Year moved to
 --     internal variables for consistency
 --     with usp_DropCourse
--- =============================================
 
 CREATE OR ALTER PROCEDURE dbo.usp_EnrollStudent
     @StudentID INT,
@@ -18,16 +16,12 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- ─────────────────────────────────────────
     -- Hardcoded current semester values
     -- Update these at the start of each semester
-    -- ─────────────────────────────────────────
     DECLARE @Semester VARCHAR(6) = 'Spring';
     DECLARE @Academic_Year SMALLINT  = 2026;
 
-    -- ─────────────────────────────────────────
     -- DECLARE variables for validation checks
-    -- ─────────────────────────────────────────
     DECLARE @StudentExists  INT;
     DECLARE @CourseExists INT;
     DECLARE @EnrollmentCount INT;
@@ -35,16 +29,12 @@ BEGIN
 
     BEGIN TRY
 
-        -- ─────────────────────────────────────
         -- CHECK 1: Is today within the enrollment window?
         -- Guard clause - fails fast if deadline passed
-        -- ─────────────────────────────────────
         IF CAST(GETDATE() AS DATE) > @EnrollDeadline
             THROW 50001, 'Enrollment failed: The enrollment deadline has passed for this semester.', 1;
 
-        -- ─────────────────────────────────────
         -- CHECK 2: Does the student exist?
-        -- ─────────────────────────────────────
         SELECT @StudentExists = COUNT(*)
         FROM dbo.Students
         WHERE StudentID = @StudentID;
@@ -52,9 +42,7 @@ BEGIN
         IF @StudentExists = 0
             THROW 50002, 'Enrollment failed: Student ID does not exist in the system.', 1;
 
-        -- ─────────────────────────────────────
         -- CHECK 3: Does the course exist?
-        -- ─────────────────────────────────────
         SELECT @CourseExists = COUNT(*)
         FROM dbo.Courses
         WHERE CourseID = @CourseID;
@@ -62,9 +50,7 @@ BEGIN
         IF @CourseExists = 0
             THROW 50003, 'Enrollment failed: Course ID does not exist in the system.', 1;
 
-        -- ─────────────────────────────────────
         -- CHECK 4: Has the student already enrolled in this course this semester?
-        -- ─────────────────────────────────────
         SELECT @AlreadyEnrolled = COUNT(*)
         FROM dbo.Enrollments
         WHERE StudentID = @StudentID
@@ -76,9 +62,7 @@ BEGIN
         IF @AlreadyEnrolled > 0
             THROW 50004, 'Enrollment failed: Student is already enrolled in this course for the current semester.', 1;
 
-        -- ─────────────────────────────────────
         -- CHECK 5: Has the student hit the 7-course cap for this semester?
-        -- ─────────────────────────────────────
         SELECT @EnrollmentCount = COUNT(*)
         FROM dbo.Enrollments
         WHERE StudentID = @StudentID
@@ -89,9 +73,7 @@ BEGIN
         IF @EnrollmentCount >= 7
             THROW 50005, 'Enrollment failed: Student has reached the maximum of 7 courses for this semester.', 1;
 
-        -- ─────────────────────────────────────
         -- All checks passed — open transaction and perform the enrollment
-        -- ─────────────────────────────────────
         BEGIN TRANSACTION;
 
             INSERT INTO dbo.Enrollments (StudentID, CourseID, Semester, Academic_Year, Grade, Status)
